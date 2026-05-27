@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-zinc-100 text-zinc-900">
@@ -21,18 +23,12 @@ export default function Home() {
 
         {/* リンクボタン */}
         <div className="mt-10 flex flex-wrap gap-4">
-          <a
-            href="#"
-            className="rounded border border-zinc-400 bg-white px-5 py-2.5 font-mono text-sm font-medium text-zinc-900 transition-colors duration-200 hover:border-zinc-900 hover:bg-zinc-900 hover:text-white"
-          >
-            GitHub
-          </a>
-          <a
-            href="#"
-            className="rounded border border-zinc-400 bg-white px-5 py-2.5 font-mono text-sm font-medium text-zinc-900 transition-colors duration-200 hover:border-zinc-900 hover:bg-zinc-900 hover:text-white"
-          >
-            AtCoder
-          </a>
+          <Button asChild variant="outline">
+            <a href="#">GitHub</a>
+          </Button>
+          <Button asChild variant="outline">
+            <a href="#">AtCoder</a>
+          </Button>
         </div>
 
       </section>
