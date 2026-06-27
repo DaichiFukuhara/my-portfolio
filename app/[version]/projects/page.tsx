@@ -1,8 +1,24 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { projects } from "@/data/projects";
+import { buildVersionPath } from "@/lib/version-routing";
 
-export default function ProjectsPage() {
+/**
+ * ProjectsPage（/{version}/projects）
+ * ----------------------------------
+ * プロジェクト一覧ページ。バージョン配下に置かれるため、
+ * 内部リンクはすべて現在のバージョンを前置して組み立てる。
+ *
+ * params はバージョン検証済みの [version] レイアウト配下で渡される
+ * （Next.js 16 では params は Promise なので await して取り出す）。
+ */
+export default async function ProjectsPage({
+  params,
+}: {
+  params: Promise<{ version: string }>;
+}) {
+  const { version } = await params;
+
   return (
     <main className="min-h-screen bg-zinc-100 text-zinc-900">
       <section className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-8 py-24">
@@ -20,7 +36,11 @@ export default function ProjectsPage() {
         {/* カード一覧 */}
         <ul className="mt-12 flex flex-col gap-6">
           {projects.map((project) => {
+            // 内部リンク（/ 始まり）はバージョンを前置、外部 URL（https 等）はそのまま使う。
             const isInternal = project.href.startsWith("/");
+            const href = isInternal
+              ? buildVersionPath(version, project.href)
+              : project.href;
             return (
               <li
                 key={project.slug}
@@ -45,11 +65,11 @@ export default function ProjectsPage() {
                 <div className="mt-4">
                   {isInternal ? (
                     <Button asChild variant="default">
-                      <Link href={project.href}>開く</Link>
+                      <Link href={href}>開く</Link>
                     </Button>
                   ) : (
                     <Button asChild variant="outline">
-                      <a href={project.href} target="_blank" rel="noopener noreferrer">
+                      <a href={href} target="_blank" rel="noopener noreferrer">
                         開く
                       </a>
                     </Button>
@@ -60,10 +80,10 @@ export default function ProjectsPage() {
           })}
         </ul>
 
-        {/* 戻るボタン */}
+        {/* 戻るボタン（現在バージョンのトップへ） */}
         <div className="mt-12">
           <Button asChild variant="outline">
-            <Link href="/">← Home</Link>
+            <Link href={buildVersionPath(version, "")}>← Home</Link>
           </Button>
         </div>
 

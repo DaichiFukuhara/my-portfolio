@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { CommandLauncher } from "@/components/CommandLauncher";
+import { VersionSelector } from "@/components/VersionSelector";
+import { VersionSwitchOverlay } from "@/components/VersionSwitchOverlay";
 
 const jetbrainsMono = JetBrains_Mono({subsets:['latin'],variable:'--font-mono'});
 
@@ -33,7 +35,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
+        <VersionSelector />
         <CommandLauncher />
+        <VersionSwitchOverlay />
       </body>
     </html>
   );
