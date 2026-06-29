@@ -10,6 +10,11 @@ export const versions: Version[] = [
     codename: "default",
     description: "標準ポートフォリオ",
   },
+  {
+    id: "v0.2.0",
+    codename: "bands",
+    description: "帯シーン構成（実験的）",
+  },
 ];
 
 export const defaultVersion = versions[0];

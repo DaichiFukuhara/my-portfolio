@@ -128,3 +128,26 @@
     @apply font-mono;
   }
 }
+
+@layer utilities {
+  @keyframes bandSwap {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .band-animate {
+    animation: bandSwap 280ms ease-out both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .band-animate {
+      animation: none;
+    }
+  }
+}
