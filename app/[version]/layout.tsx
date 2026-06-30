@@ -20,7 +20,9 @@ export default async function VersionLayout({
     notFound();
   }
 
-  // バージョンごとにレイアウトを切り替える（増えたらマップ化する）。
-  const Layout = version === "v0.2.0" ? BandSceneLayout : DefaultLayout;
-  return <Layout>{children}</Layout>;
+  // v0.2.0 は SPA 型。children は使わず、シーンは state から決まる。
+  if (version === "v0.2.0") {
+    return <BandSceneLayout />;
+  }
+  return <DefaultLayout>{children}</DefaultLayout>;
 }

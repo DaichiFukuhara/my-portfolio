@@ -1,28 +1,14 @@
-"use client";
-
-import { usePathname } from "next/navigation";
-
-type Props = {
-  className?: string;
-  style?: React.CSSProperties;
-};
-
 /**
  * IdentityBand
  * ------------
  * 最上部のターミナルプロンプト風帯。
- * 現在パス全体（バージョン部分を含む）を usePathname から取得して表示する。
- * 例: d@portfolio:/v0.2.0/history$
+ * v0.2.0 では URL がシーンに連動しないため、パスは固定表示でよい。
+ * シーン切替時も内容が変わらないのでアニメーションさせない（key を変えない）。
  */
-export function IdentityBand({ className, style }: Props) {
-  const pathname = usePathname();
-
+export function IdentityBand() {
   return (
-    <header
-      className={`border-b border-zinc-300 px-6 py-3 font-mono text-xs text-zinc-500 ${className ?? ""}`}
-      style={style}
-    >
-      <span>d@portfolio:{pathname}$</span>
+    <header className="border-b border-zinc-300 px-6 py-3 font-mono text-xs text-zinc-500 sm:text-sm">
+      <span>d@portfolio:~$</span>
     </header>
   );
 }

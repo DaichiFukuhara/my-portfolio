@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { commands } from "@/data/commands";
+import { type SceneId, scenes } from "@/data/scenes";
+import { useBandScene } from "@/lib/band-scene-context";
 import {
   resolveVersion,
   stripVersion,
@@ -40,7 +42,21 @@ import {
  * 配置:
  *   ルートレイアウト（app/layout.tsx）に常駐。左下の VersionSelector と左右で対になる。
  *   バージョン切替ロジックは VersionSelector と共通で lib/version-routing.ts を利用する。
+ *
+ *   v0.2.0 "bands" にいる場合のみ、push コマンドは URL 遷移ではなく
+ *   BandScene の state 変更（シーン差し替え）として扱う。
  */
+
+/**
+ * コマンド名を v0.2.0 のシーン ID に対応付ける。
+ * "home" は top シーンへ、それ以外は同名のシーンを探す（"history" → "history"）。
+ * 対応するシーンが無い場合（"projects" 等）は null を返し、何もしない。
+ */
+function commandNameToSceneId(name: string): SceneId | null {
+  if (name === "home") return "top";
+  return scenes.find((s) => s.id === name)?.id ?? null;
+}
+
 export function CommandLauncher() {
   const router = useRouter();
 
@@ -50,6 +66,11 @@ export function CommandLauncher() {
   // version が undefined（/projects 等のバージョン外パスや遷移直後）の場合は
   // defaultVersion にフォールバックする。
   const currentVersion = resolveVersion(params.version as string | undefined);
+
+  // v0.2.0 にいるかどうか。push コマンドの扱い（URL 遷移 / シーン state 変更）を分岐する。
+  const isOnBands = params.version === "v0.2.0";
+  // シーン state の変更口。Provider は常に張られているので基本 non-null。
+  const bandScene = useBandScene();
 
   // Dialog の開閉状態。
   const [open, setOpen] = useState(false);
@@ -61,24 +82,44 @@ export function CommandLauncher() {
    */
   function handleRun() {
     const found = commands.find((c) => c.name === selected);
-    if (found) {
-      if (found.action === "push") {
-        // versioned な push（home / history 等）は現在のバージョンを前置して
-        // /{version}{path} へ。versioned でない push（/projects 等）はそのまま遷移。
-        router.push(
-          found.versioned
-            ? buildVersionPath(currentVersion, found.path)
-            : found.path
-        );
-      } else if (found.action === "back") {
-        router.back();
-      } else if (found.action === "version") {
-        // 現在のサブパスを保持したままバージョンだけ切り替える
-        // （VersionSelector の Run と同じロジック）。
-        const subPath = stripVersion(pathname, currentVersion);
-        router.push(buildVersionPath(found.versionId, subPath));
-      }
+    if (!found) {
+      setOpen(false);
+      return;
     }
+
+    if (found.action === "version") {
+      // 現在のサブパスを保持したままバージョンだけ切り替える
+      // （VersionSelector の Run と同じロジック）。
+      const subPath = stripVersion(pathname, currentVersion);
+      router.push(buildVersionPath(found.versionId, subPath));
+      setOpen(false);
+      return;
+    }
+
+    if (found.action === "back") {
+      router.back();
+      setOpen(false);
+      return;
+    }
+
+    // ここからは action === "push"。
+    if (isOnBands) {
+      // v0.2.0 では URL 遷移せず、対応するシーンへ state を差し替える。
+      // 対応シーンが無いコマンド（projects 等）は何もしない。
+      const sceneId = commandNameToSceneId(found.name);
+      if (sceneId) bandScene?.setCurrentSceneId(sceneId);
+      setOpen(false);
+      return;
+    }
+
+    // v0.1.0 等は従来通り URL 遷移。
+    // versioned な push（home / history 等）は現在のバージョンを前置して
+    // /{version}{path} へ。versioned でない push はそのまま遷移。
+    router.push(
+      found.versioned
+        ? buildVersionPath(currentVersion, found.path)
+        : found.path
+    );
     setOpen(false);
   }
 

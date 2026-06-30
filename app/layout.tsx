@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { CommandLauncher } from "@/components/CommandLauncher";
 import { VersionSelector } from "@/components/VersionSelector";
 import { VersionSwitchOverlay } from "@/components/VersionSwitchOverlay";
+import { BandSceneProvider } from "@/lib/band-scene-context";
 
 const jetbrainsMono = JetBrains_Mono({subsets:['latin'],variable:'--font-mono'});
 
@@ -34,10 +35,12 @@ export default function RootLayout({
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-mono", jetbrainsMono.variable)}
     >
       <body className="min-h-full flex flex-col">
-        {children}
-        <VersionSelector />
-        <CommandLauncher />
-        <VersionSwitchOverlay />
+        <BandSceneProvider>
+          {children}
+          <VersionSelector />
+          <CommandLauncher />
+          <VersionSwitchOverlay />
+        </BandSceneProvider>
       </body>
     </html>
   );
